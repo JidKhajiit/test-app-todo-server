@@ -13,4 +13,26 @@ Content-Type: application/json
 
 ###
 
-GET http:/localhost:3000/signup
+GET http://localhost:3000/auth/test
+
+###
+
+POST http://localhost:3000/auth/signup
+Content-Type: application/json
+
+{
+    "login": "podpivasnik2281",
+    "password": "sliva",
+    "firstName": "Artem",
+    "lastName": "Mironov"
+}
+
+###
+
+POST http://localhost:3000/auth/signin
+Content-Type: application/json
+
+{
+    "login": "podpivasnik228",
+    "password": "sliva"
+}
