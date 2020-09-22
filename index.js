@@ -4,19 +4,25 @@ import products from "./products.js";
 import bodyParser from "body-parser";
 import createError from 'http-errors';
 
-import authRouter from "./routes/auth.js"
-import mongoose from './lib/mongoose.js'
+import authRouter from "./routes/auth.js";
+import tasksPouter from "./routes/tasks.js"
+import mongoose from './lib/mongoose.js'; //так нада.
+import cors from 'cors';
 
 
 const app = Express();
-const port = 3000;
+const port = 3001;
+
+app.use(cors());
 
 app.use(Express.json());
 app.use(Express.urlencoded({ extended: false }))
 app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({ extended: true }))
 
+
 app.use('/auth', authRouter);
+app.use('/tasks', tasksPouter);
 
 function mid(req, res, next) {
     console.log(req.query);
