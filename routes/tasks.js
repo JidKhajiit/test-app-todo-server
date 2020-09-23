@@ -71,15 +71,31 @@ router.patch('/:id', async (req, res) => {
 
         if(!currentUser) throw new Error("User isn't authorized.");
 
-        const editedTask = await Task.updateOne({ _id: id }, { checked });
-
-        if(!editedTask) throw new Error("Task isn't found.");
+        const editedTask = await Task.updateOne({ _id: id }, { "checked": checked });
         const usersTasks = await Task.find({userId: authorization});
+
         res.status(200).send(usersTasks);
     } catch (err) {
         console.log(err.message)
         res.status(500).json(err.message)
     }
+})
+
+router.patch('/', async (req, res) => {
+    try {
+    const { body: { checked }, headers: { authorization } } = req;
+    const currentUser = await User.findOne({_id: authorization});
+
+    if(!currentUser) throw new Error("User isn't authorized.");
+
+    const editedTask = await Task.updateMany({ userId: authorization }, { "checked": checked });
+    const usersTasks = await Task.find({userId: authorization});
+
+    res.status(200).send(usersTasks);
+} catch (err) {
+    console.log(err.message)
+    res.status(500).json(err.message)
+}
 })
 
 export default router
