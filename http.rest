@@ -51,3 +51,7 @@ Authorization: 5f68b1d468a7638212b65cef
 {
     "checked": true
 }
+
+###
+
+GET http://localhost:3001/auth/5f68b1d468a7638212b65cef

@@ -65,7 +65,7 @@ router.post('/newTask', async (req, res) => {
 })
 
 router.patch('/:id', async (req, res) => {
-        try {
+    try {
         const { params: { id }, body: { checked }, headers: { authorization } } = req;
         const currentUser = await User.findOne({_id: authorization});
 

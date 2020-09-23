@@ -4,10 +4,21 @@ import User from '../schemes/user.js'
 const router = Router()
 
 
-router.get('/test', (req, res) => {
-    res.send({
-        message: 'Node.js and Express REST API'
-    })
+router.get('/:id', async (req, res) => {
+    try {
+        const { params: { id } } = req;
+
+        const currentUser = await User.findOne({_id: id});
+        const { firstName, lastName } = currentUser;
+        const response = {
+            firstName,
+            lastName
+        }
+        res.status(200).send(response);
+    } catch (err) {
+        console.log(err.message)
+        res.status(500).json(err.message)
+    }
 })
 
 router.post('/signup', async (req, res) => {
@@ -25,10 +36,15 @@ router.post('/signup', async (req, res) => {
             firstName,
             lastName
         });
-        console.log(user);
+        // console.log(user);
         const newUser = await user.save();
-        // console.log("Сохранен объект", newUser);
-        res.status(201).json(newUser);
+        const { _id } = newUser;
+        const response = {
+            firstName,
+            lastName,
+            _id
+        }
+        res.status(201).json(response);
     } catch (err) {
 
         console.log(err.message)
