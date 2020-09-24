@@ -1,38 +1,36 @@
 import Router from 'express'
 import Task from '../schemes/task.js'
 import User from '../schemes/user.js'
+import passport from 'passport'
+import user from '../schemes/user.js'
 
 const router = Router()
 
 
-router.get('/', async (req, res) => {
+router.get('/',  async (req, res) => {
     try {
-    const { headers: { authorization } } = req;
-    console.log(authorization);
-    const currentUser = await User.findOne({_id: authorization});
-    // console.log(currentUser["_id"]);
-    if(!currentUser) throw new Error("User isn't authorized.")
-   
-    const usersTasks = await Task.find({userId: authorization});
-    
-    res.status(200).json(usersTasks);        
+        const { user: { _id: userId } } = req;
+        const usersTasks = await Task.find({userId});
+        
+        res.status(200).json(usersTasks);        
     } catch (err) {
         console.log(err.message)
         res.status(500).json("server error")
     }
 })
 
-router.delete('/:id', async (req, res) => {
+router.delete('/:id',  async (req, res) => {
     try {
-        const { params: { id }, headers: { authorization } } = req;
-        const currentUser = await User.findOne({_id: authorization});
+        const { params: { id }, user: { _id: userId } } = req;
+        const bindWithUser = await Task.findOne({_id: id, userId});
 
-        if(!currentUser) throw new Error("User isn't authorized.");
+        if(!bindWithUser) throw new Error("This data isn't yours.");
 
         const deletedTask = await Task.findByIdAndRemove(id);
 
         if(!deletedTask) throw new Error("Task isn't found.");
-        const usersTasks = await Task.find({userId: authorization});
+
+        const usersTasks = await Task.find({userId});
         res.status(200).send(usersTasks);
     } catch (err) {
         console.log(err.message)
@@ -42,11 +40,7 @@ router.delete('/:id', async (req, res) => {
 
 router.post('/newTask', async (req, res) => {
     try {
-        const { body: { text, checked }, headers: { authorization: userId } } = req;
-        const currentUser = await User.findOne({_id: userId});
-
-        if(!currentUser) throw new Error("User isn't authorized.");
-
+        const { body: { text, checked }, user: { _id: userId } } = req;
         const task = new Task({
             text,
             checked,
@@ -66,13 +60,13 @@ router.post('/newTask', async (req, res) => {
 
 router.patch('/:id', async (req, res) => {
     try {
-        const { params: { id }, body: { checked }, headers: { authorization } } = req;
-        const currentUser = await User.findOne({_id: authorization});
+        const { params: { id }, body: { checked }, user: { _id: userId } } = req;
+        const bindWithUser = await Task.findOne({_id: id, userId});
 
-        if(!currentUser) throw new Error("User isn't authorized.");
+        if(!bindWithUser) throw new Error("This data isn't yours.");
 
-        const editedTask = await Task.updateOne({ _id: id }, { "checked": checked });
-        const usersTasks = await Task.find({userId: authorization});
+        const editedTask = await Task.updateOne({ _id: id }, { checked });
+        const usersTasks = await Task.find({userId});
 
         res.status(200).send(usersTasks);
     } catch (err) {

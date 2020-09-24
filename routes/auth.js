@@ -1,6 +1,10 @@
 import Router from 'express'
+import jwt from 'jsonwebtoken';
+import passport from 'passport';
 import User from '../schemes/user.js'
+import config from '../config/constants.js'
 
+const { secretOrKey } =  config;
 const router = Router()
 
 
@@ -23,7 +27,6 @@ router.get('/:id', async (req, res) => {
 
 router.post('/signup', async (req, res) => {
     const { body: { login, password, firstName, lastName } } = req;
-
     try {
         const isUserExist = await User.findOne({ login });
         console.log(isUserExist);
@@ -38,13 +41,12 @@ router.post('/signup', async (req, res) => {
         });
         // console.log(user);
         const newUser = await user.save();
-        const { _id } = newUser;
-        const response = {
+        const token = `Bearer ${jwt.sign({
+            login,
             firstName,
-            lastName,
-            _id
-        }
-        res.status(201).json(response);
+            lastName
+        }, secretOrKey, {expiresIn: 86400 * 30})}`;
+        res.status(201).send(token);
     } catch (err) {
 
         console.log(err.message)
@@ -58,15 +60,23 @@ router.post('/signup', async (req, res) => {
 
 router.post('/signin', async (req, res) => {
     const { body: { login, password } } = req;
+    console.log(login, password)
 
     try {
         const isUserExist = await User.findOne({ login });
+        console.log(isUserExist)
         if (!isUserExist) {
             throw new Error("User isn't exist.")
         } else if (isUserExist.password !== password) {
             throw new Error("Wrong password. Ur mom will die!!!")
         } else {
-            res.status(200).json(isUserExist)
+            const { login, firstName, lastName } = isUserExist
+            const token = `Bearer ${jwt.sign({
+                login,
+                firstName,
+                lastName 
+            }, secretOrKey, {expiresIn: 86400 * 30})}`;
+            res.status(200).send(token)
         }
 
     } catch (err) {
